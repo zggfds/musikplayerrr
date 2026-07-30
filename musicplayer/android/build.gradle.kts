@@ -22,20 +22,32 @@ tasks.register<Delete>("clean") {
 
 // Умный фикс для Namespace (работает и для Groovy, и для Kotlin плагинов)
 subprojects {
-    val setupNamespace = {
+    val setupProject = {
         val android = extensions.findByName("android") as? com.android.build.gradle.BaseExtension
         android?.apply {
+            // Исправляем Namespace
             if (namespace == null) {
-                // Если namespace не задан в плагине, берем его из ID проекта
                 namespace = project.group.toString()
+            }
+            
+            // ПРИНУДИТЕЛЬНО ставим Java 17 для всех плагинов
+            compileOptions {
+                sourceCompatibility = JavaVersion.VERSION_17
+                targetCompatibility = JavaVersion.VERSION_17
+            }
+        }
+        
+        // ПРИНУДИТЕЛЬНО ставим Kotlin JVM 17 для всех плагинов
+        tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+            kotlinOptions {
+                jvmTarget = "17"
             }
         }
     }
 
-    // Если проект уже "вычислен", применяем сразу. Если нет - ждем.
     if (state.executed) {
-        setupNamespace()
+        setupProject()
     } else {
-        afterEvaluate { setupNamespace() }
+        afterEvaluate { setupProject() }
     }
 }

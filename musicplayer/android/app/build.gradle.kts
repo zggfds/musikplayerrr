@@ -6,8 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.musicplayer"
-    compileSdk = 34
-    ndkVersion = flutter.ndkVersion
+    compileSdk = 36  // Ставим 36, как просил лог
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -15,22 +14,16 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.musicplayer"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 34 // Можно оставить 34 или поставить 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
-
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
-        }
+    
+    // ДОБАВЬ ИЛИ ИСПРАВЬ ЭТОТ БЛОК:
+    kotlinOptions {
+        jvmTarget = "17" 
     }
 }
 
