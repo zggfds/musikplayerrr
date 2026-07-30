@@ -5,7 +5,6 @@ allprojects {
     }
 }
 
-// Настройка путей сборки (стандарт для Flutter)
 val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
 rootProject.layout.buildDirectory.value(newBuildDir)
 
@@ -14,40 +13,40 @@ subprojects {
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 
-// Мы убрали блок evaluationDependsOn(":app"), так как он мешает сборке
-
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
 
-// Умный фикс для Namespace (работает и для Groovy, и для Kotlin плагинов)
+// Современный фикс для всех плагинов (библиотек)
 subprojects {
-    val setupProject = {
-        val android = extensions.findByName("android") as? com.android.build.gradle.BaseExtension
-        android?.apply {
-            // Исправляем Namespace
-            if (namespace == null) {
-                namespace = project.group.toString()
-            }
-            
-            // ПРИНУДИТЕЛЬНО ставим Java 17 для всех плагинов
-            compileOptions {
-                sourceCompatibility = JavaVersion.VERSION_17
-                targetCompatibility = JavaVersion.VERSION_17
-            }
-        }
-        
-        // ПРИНУДИТЕЛЬНО ставим Kotlin JVM 17 для всех плагинов
-        tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-            kotlinOptions {
-                jvmTarget = "17"
-            }
+    // 1. Форсируем Java 17 для всех Java-задач
+    tasks.withType<JavaCompile>().configureEach {
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
+    }
+
+    // 2. Форсируем JVM 17 для всех Kotlin-задач (используем новый DSL)
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
 
-    if (state.executed) {
-        setupProject()
-    } else {
-        afterEvaluate { setupProject() }
+    // 3. Исправляем Namespace без использования устаревшего BaseExtension
+    afterEvaluate {
+        if (extensions.findByName("android") != null) {
+            val android = extensions.getByName("android")
+            // Используем рефлексию, чтобы не зависеть от конкретного класса Extension
+            try {
+                val getNamespace = android.javaClass.getMethod("getNamespace")
+                val setNamespace = android.javaClass.getMethod("setNamespace", String::class.java)
+                
+                if (getNamespace.invoke(android) == null) {
+                    setNamespace.invoke(android, project.group.toString())
+                }
+            } catch (e: Exception) {
+                // Если не получилось, значит плагин сам справится или это не Android-плагин
+            }
+        }
     }
 }

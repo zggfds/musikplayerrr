@@ -1,38 +1,58 @@
 plugins {
     id("com.android.application")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id("kotlin-android")
+    // Плагин Flutter должен быть последним
     id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
+    // Твой уникальный ID приложения
     namespace = "com.example.musicplayer"
-    compileSdk = 36  // Ставим 36, как просил лог
+    
+    // Требуется версия 36 для новых плагинов (just_audio, sqflite)
+    compileSdk = 36
+
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    // Настройка Kotlin на современный лад (без предупреждений)
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
+    }
+
     defaultConfig {
         applicationId = "com.example.musicplayer"
+        
+        // Минимум 21 для работы on_audio_query
         minSdk = 21
-        targetSdk = 34 // Можно оставить 34 или поставить 36
+        targetSdk = 34
+        
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
-    
-    // ДОБАВЬ ИЛИ ИСПРАВЬ ЭТОТ БЛОК:
-    kotlinOptions {
-        jvmTarget = "17" 
-    }
-}
 
-kotlin {
-    compilerOptions {
-        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    buildTypes {
+        release {
+            // Пока используем отладочный ключ, чтобы APK собрался без лишних настроек подписей
+            signingConfig = signingConfigs.getByName("debug")
+            
+            // Оптимизация (можно выключить, если будут ошибки, но для релиза это хорошо)
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
     }
 }
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Здесь обычно ничего не нужно менять, Flutter сам добавит зависимости
 }
