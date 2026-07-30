@@ -6,16 +6,17 @@ plugins {
 
 android {
     namespace = "com.example.musicplayer"
-    compileSdk = 36 // Оставляем 36, как требовали плагины
+    compileSdk = 34 // Самая стабильная версия на сегодня
 
-    // Современный способ задать версию Java для всего приложения
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlin {
-        jvmToolchain(17) // ЭТО ВАЖНО: заставляет всё использовать Java 17
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
     }
 
     defaultConfig {
