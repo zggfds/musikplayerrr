@@ -4,19 +4,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4  # Обновили до v4
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          
+
+      # Теперь мы говорим GitHub зайти в папку musicplayer перед запуском команд
       - name: Install dependencies
         run: flutter pub get
+        working-directory: musicplayer 
 
       - name: Build APK
         run: flutter build apk --release
+        working-directory: musicplayer
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4 # ТУТ БЫЛА ОШИБКА, теперь v4
+        uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          # Путь до готового файла тоже должен учитывать папку musicplayer
+          path: musicplayer/build/app/outputs/flutter-apk/app-release.apk
